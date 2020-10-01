@@ -25,12 +25,13 @@ class StateMachine {
         
         /* Gets the output for the input. For future: Design class template with the feature, and use that to pass as parameter.*/
         V transition(U in) {
+            /* Currently converts a digit to base 0. */
             V v;
             
             if(in % 2 == 0) {
                 v = 0;
             } else {
-                v = 1
+                v = 1;
             } 
         
             return v;
@@ -55,8 +56,21 @@ class StateMachine {
                 next_state(array_in[i]);
             }
         }
+        
+        int* get_user_input(int digits) {
+            int arr [digits];
+            
+            while(i < sizeof(arr)) {
+                std::cout << "Enter a digit: ";
+                std::cin >> arr[i];
+                i++;   
+            }
+
+            return *arr;
+        }
 
 };
+
 
 /* Testing */
 int main(){
@@ -66,7 +80,15 @@ int main(){
 
     /* Create a new state machine and try it out with test inputs. */
     StateMachine<int, int> state_machine(0);
-    int input_array [2] = {2, 1};
+    int digits;
+    int *input_array;
+
+    std::cout << "Enter digits in number: ";
+    std::cin >> digits;
+
+    input_array = state_machine.get_user_input(digits);
+
+
     std::vector<int> output_set;
 
     /* Run machine on input and get the output. */
@@ -77,6 +99,7 @@ int main(){
     for(int i = 0; i < state_machine.get_output().size(); i++) {
         output += std::to_string(output_set.back()); // Gets the last added element.
         output_set.pop_back();      // pops that element out so the next can be accessed the next time. 
-        std::cout << "0" + output;
     }
+
+    std::cout << " " + output;
 }
