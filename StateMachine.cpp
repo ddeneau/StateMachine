@@ -10,7 +10,7 @@ using namespace std;
    Right now, all it can do is convert base-10 integers to binary.  */
 template <class U, class V>
 class StateMachine {
-    std::vector<U> states; /* Recorded states. */
+    std::vector<V> outputs; /* Recorded outputs. */
     U initial_state; /* Starting state. */
     int iteration /* Keeps track of which state to compute on. */;
     map <U, V> instructions; /* All inputs mapped to their outputs.*/
@@ -27,28 +27,32 @@ class StateMachine {
         V transition(U in) {
             /* Currently converts a digit to base 0. */
             V v;
+            int bits = 0;
             
-            if(in % 2 == 0) {
-                v = 0;
-            } else {
-                v = 1;
-            } 
+            while(bits <= 8) {
+                if(in % 2 == 0) {
+                    v = '0';
+                } else {
+                    v = '1';
+                }
+                ++bits;
+            }
+
         
             return v;
         }
 
         /* Gets the next state from the input to place state register. */
         void next_state(U input) {
-            U state = states.at(iteration);
             V output = transition(input);
-            states.push_back(output);
+            outputs.push_back(output);
             instructions[input] = output;
             ++iteration;
         }
 
         /* Returns the output set as a list. */
-        std::vector<int> get_output() {
-            return states;
+        std::vector<string> get_output() {
+            return outputs;
         }
 
         void run_input(int  *array_in, int input_size) {
@@ -59,16 +63,16 @@ class StateMachine {
         
         int* get_user_input(int digits) {
             int arr [digits];
+            int i = 0;
             
-            while(i < sizeof(arr)) {
+            while(i < digits) {
                 std::cout << "Enter a digit: ";
                 std::cin >> arr[i];
                 i++;   
             }
 
-            return *arr;
+            return arr;
         }
-
 };
 
 
@@ -79,9 +83,9 @@ int main(){
     std::uniform_int_distribution<int> distribution(-250, 250);
 
     /* Create a new state machine and try it out with test inputs. */
-    StateMachine<int, int> state_machine(0);
+    StateMachine<int*, string> state_machine(0);
     int digits;
-    int *input_array;
+    int* input_array;
 
     std::cout << "Enter digits in number: ";
     std::cin >> digits;
@@ -89,15 +93,15 @@ int main(){
     input_array = state_machine.get_user_input(digits);
 
 
-    std::vector<int> output_set;
+    std::vector<string> output_set;
 
     /* Run machine on input and get the output. */
-    state_machine.run_input(input_array, sizeof(input_array));
+    state_machine.run_input(input_array, digits);
     output_set = state_machine.get_output();
     std::string output;
     
-    for(int i = 0; i < state_machine.get_output().size(); i++) {
-        output += std::to_string(output_set.back()); // Gets the last added element.
+    for(int i = 0; i < output_set.size(); i++) {
+        output += output_set.back() + " "; // Gets the last added element.
         output_set.pop_back();      // pops that element out so the next can be accessed the next time. 
     }
 
