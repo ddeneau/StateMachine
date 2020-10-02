@@ -3,6 +3,7 @@
 #include <string>
 #include <random>
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 
@@ -17,27 +18,37 @@ class StateMachine {
     map <U, V> instructions; /* All inputs mapped to their outputs.*/
 
      public:
-        /* Take in input and create state machine. */
+        /* Take in input and create state machine.
+        @param start - the starting element in the computation.  */
         StateMachine(U start) {
             initial_state = start;
             iteration = 0;
             states.push_back(initial_state);
         }
         
-        /* Gets the output for the input. For future: Design class template with the feature, and use that to pass as parameter.*/
+        /* Gets the output for the input. For future: Design class template with the feature, and use that to pass as parameter.
+        @param in - the input variable.
+        @return - the output for that input.  */
         V transition(U in) {
             V v;
+            int i = 0;
             
-            if(in % 2 == 0) {
-                v = '0';
-            } else {
-                v = '1';
-            } 
-        
+           while(i < 8) {
+               if(in % 2 == 0) {
+                   v += '0';
+               } else if(in % 2 == 1) {
+                   v += '1';
+               }
+
+               in = in / 2;
+               ++i;
+           }
+
             return v;
         }
 
-        /* Gets the next state from the input to place state register. */
+        /* Gets the next state from the input to place state register. 
+        @param input - the input variable. */
         void next_state(U input) {
             U state = states.at(iteration);
             V output = transition(input);
@@ -47,18 +58,42 @@ class StateMachine {
             ++iteration;
         }
 
-        /* Returns the output set as a list. */
+        /* Returns the output set as a list. 
+        @return - The list of outputs. */
         std::vector<V> get_output() {
             return outputs;
         }
 
+        /* Calculates the output for a set of input.
+        @param input - the inputs to be computed on. 
+        @param input_size - the size of the input.  */
         void run_input(std::vector<int> input, int input_size) {
-            for(int i = 1; i < input_size; i++)  {
-                next_state(input.at(i));
+            for(int i = 0; i < input_size; i++)  {
+                try {
+                    next_state(input.at(i));
+                }
+
+                catch(std::out_of_range) {
+                    std::cerr << "Must fit within 8 bits." << '\n';
+                }
             }
         }
 
 };
+
+/* Reverses strings of binary representations of numbers. 
+@param str - the original string. 
+@param n - the length of the string. 
+@return - the reversed version of str.  */
+string reverse(string str, int n) {
+    string new_str;
+
+    for(int i = n - 1; i >= 0; i--) {
+        new_str += str[i];
+    } 
+
+    return new_str;
+}
 
 /* Testing */
 int main() {
@@ -82,4 +117,13 @@ int main() {
 
     /* Run machine on input and get the output. */
     state_machine.run_input(inputs, n);
+    std::vector<string> outputs = state_machine.get_output();
+    string results = "";
+
+    for(int i = 0; i < outputs.size(); i++) {
+        string term = outputs.at(i);
+        results += reverse(term, term.length()) + '\n';
+    }
+
+    std::cout << results;
 }
